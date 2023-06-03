@@ -1,4 +1,4 @@
-FROM ros:foxy as base
+FROM ros:galactic as base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
@@ -20,5 +20,11 @@ RUN pip install --upgrade pytest
 # Install the colcon-cargo and colcon-ros-cargo plugins
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git
 
-RUN mkdir -p /workspace && echo "Did you forget to mount the repository into the Docker container?" > /workspace/HELLO.txt
+# RUN mkdir -p /workspace && echo "Did you forget to mount the repository into the Docker container?" > /workspace/HELLO.txt
+RUN mkdir -p /workspace
+
+RUN rustup install nightly
+RUN rustup default nightly
+
 WORKDIR /workspace
+RUN . /opt/ros/galactic/setup.sh
