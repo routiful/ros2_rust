@@ -135,3 +135,18 @@ pub fn create_node(context: &Context, node_name: &str) -> Result<Node, RclrsErro
 pub fn create_node_builder(context: &Context, node_name: &str) -> NodeBuilder {
     Node::builder(context, node_name)
 }
+
+pub fn install_signal_handler(context: &Context) {
+    use tokio::runtime::Runtime;
+
+    let rt = Runtime::new().unwrap();
+    rt.spawn(async move {
+        tokio::signal::ctrl_c().await.unwrap();
+        println!("call context shutdown");
+        // context.shutdown();
+    });
+}
+
+pub fn shutdown(context: &Context) {
+    context.shutdown();
+}
