@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 pub use self::builder::*;
 use crate::rcl_bindings::*;
-use crate::RclrsError;
+use crate::error::{to_rclrs_result, RclrsError};
 
 impl Drop for rcl_context_t {
     fn drop(&mut self) {
@@ -13,9 +13,10 @@ impl Drop for rcl_context_t {
             // line arguments.
             // SAFETY: No preconditions for this function.
             if rcl_context_is_valid(self) {
-                // SAFETY: These functions have no preconditions besides a valid rcl_context
-                rcl_shutdown(self);
-                rcl_context_fini(self);
+                let ret = rcl_context_fini(self);
+                if let Err(e) = to_rclrs_result(ret) {
+                    panic!("Failed to finalize context: {:?}", e);
+                }
             }
         }
     }
@@ -45,6 +46,7 @@ impl Context {
     /// See [`ContextBuilder::new()`] for documentation.
     #[allow(clippy::new_ret_no_self)]
     pub fn new(args: impl IntoIterator<Item = String>) -> Result<Self, RclrsError> {
+        println!("call context builder");
         Self::builder(args).build()
     }
 
@@ -145,6 +147,32 @@ impl Context {
     /// ```
     pub fn builder(args: impl IntoIterator<Item = String>) -> ContextBuilder {
         ContextBuilder::new(args)
+    }
+
+    /// Shutdown the context, making it uninitialized and therefore invalid for derived entities.
+    ///
+    /// # Example
+    /// ```
+    /// # use rclrs::{Context, RclrsError};
+    /// let context = Context::new([])?;
+    /// assert!(context.shutdown());
+    /// ```
+    pub fn shutdown(&self) -> bool {
+        unsafe {
+            let rcl_context = &mut *self.rcl_context_mtx.lock().unwrap();
+            // The context may be invalid when rcl_init failed, e.g. because of invalid command
+            // line arguments.
+            // SAFETY: No preconditions for this function.
+            if rcl_context_is_valid(rcl_context) {
+                return false;
+            }
+            // SAFETY: These functions have no preconditions besides a valid rcl_context
+            let ret = rcl_shutdown(rcl_context);
+            if let Err(e) = to_rclrs_result(ret) {
+                panic!("Failed to finalize context: {:?}", e);
+            }
+        }
+        true
     }
 }
 
