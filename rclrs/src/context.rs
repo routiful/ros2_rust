@@ -13,10 +13,12 @@ impl Drop for rcl_context_t {
             // line arguments.
             // SAFETY: No preconditions for this function.
             if rcl_context_is_valid(self) {
-                let ret = rcl_context_fini(self);
-                if let Err(e) = to_rclrs_result(ret) {
-                    panic!("Failed to finalize context: {:?}", e);
-                }
+                rcl_shutdown(self);
+            }
+
+            let ret = rcl_context_fini(self);
+            if let Err(e) = to_rclrs_result(ret) {
+                panic!("Failed to finalize context: {:?}", e);
             }
         }
     }
@@ -46,7 +48,6 @@ impl Context {
     /// See [`ContextBuilder::new()`] for documentation.
     #[allow(clippy::new_ret_no_self)]
     pub fn new(args: impl IntoIterator<Item = String>) -> Result<Self, RclrsError> {
-        println!("call context builder");
         Self::builder(args).build()
     }
 
@@ -163,7 +164,7 @@ impl Context {
             // The context may be invalid when rcl_init failed, e.g. because of invalid command
             // line arguments.
             // SAFETY: No preconditions for this function.
-            if rcl_context_is_valid(rcl_context) {
+            if !rcl_context_is_valid(rcl_context) {
                 return false;
             }
             // SAFETY: These functions have no preconditions besides a valid rcl_context
@@ -171,8 +172,8 @@ impl Context {
             if let Err(e) = to_rclrs_result(ret) {
                 panic!("Failed to finalize context: {:?}", e);
             }
+            return true;
         }
-        true
     }
 }
 

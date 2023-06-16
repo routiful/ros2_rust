@@ -24,6 +24,7 @@ mod rcl_bindings;
 pub mod dynamic_message;
 
 use std::time::Duration;
+use std::sync::Arc;
 
 pub use arguments::*;
 pub use client::*;
@@ -136,17 +137,21 @@ pub fn create_node_builder(context: &Context, node_name: &str) -> NodeBuilder {
     Node::builder(context, node_name)
 }
 
-pub fn install_signal_handler(context: &Context) {
-    use tokio::runtime::Runtime;
-
-    let rt = Runtime::new().unwrap();
-    rt.spawn(async move {
-        tokio::signal::ctrl_c().await.unwrap();
-        println!("call context shutdown");
-        // context.shutdown();
+/// Install signal handler.
+///
+/// Convenience function to install signal handler.
+/// When it receives SIGINT, call context shutdown.
+pub async fn install_signal_handler(context: Arc<Context>) {
+    let context = Arc::clone(&context);
+    tokio::spawn(async move {
+        while let Ok(_) = tokio::signal::ctrl_c().await {
+            context.shutdown();
+        }
     });
 }
 
+/// Call context shutdown
+///
 pub fn shutdown(context: &Context) {
     context.shutdown();
 }
