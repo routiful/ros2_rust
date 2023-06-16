@@ -14,7 +14,7 @@ path = "src/lib.rs"
 # Please keep the list of dependencies alphabetically sorted,
 # and also state why each dependency is needed.
 [dependencies]
-# Needed for dynamically finding type support libraries 
+# Needed for dynamically finding type support libraries
 ament_rs = { version = "0.2", optional = true }
 # Needed for clients
 futures = "0.3"
@@ -23,7 +23,7 @@ libloading = { version = "0.7", optional = true }
 # Needed for the Message trait, among others
 rosidl_runtime_rs = "0.3"
 # Needed for asyncronous programming
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "signal"] }
+tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
 # Needed for e.g. writing yaml files in tests
