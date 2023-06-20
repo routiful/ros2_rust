@@ -23,7 +23,7 @@ libloading = { version = "0.7", optional = true }
 # Needed for the Message trait, among others
 rosidl_runtime_rs = "0.3"
 # Needed for asyncronous programming
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "signal"] }
 
 [dev-dependencies]
 # Needed for e.g. writing yaml files in tests

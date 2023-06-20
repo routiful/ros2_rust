@@ -115,6 +115,29 @@ pub fn create_node(context: &Context, node_name: &str) -> Result<Node, RclrsErro
     Node::builder(context, node_name).build()
 }
 
+/// Creates a new node with default_context.
+///
+/// Convenience function equivalent to [`Node::new`][1].
+/// Please see that function's documentation.
+///
+/// [1]: crate::Node::new
+///
+/// # Example
+/// ```
+/// # use rclrs::{RclrsError};
+/// rclrs::init([]);
+/// let node = rclrs::create_node_with_default_context("my_node");
+/// assert!(node.is_ok());
+/// # Ok::<(), RclrsError>(())
+/// ```
+pub fn create_node_with_default_context(node_name: &str) -> Result<Node, RclrsError> {
+    let default_context_m = DefaultContext::get_global_default_context([]);
+    let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+    let context = Arc::clone(&context);
+
+    Node::builder(&context, node_name).build()
+}
+
 /// Creates a [`NodeBuilder`][1].
 ///
 /// Convenience function equivalent to [`NodeBuilder::new()`][2] and [`Node::builder()`][3].
@@ -150,8 +173,31 @@ pub async fn install_signal_handler(context: Arc<Context>) {
     });
 }
 
+/// Call init
+///
+pub async fn init(args: impl IntoIterator<Item = String>) -> Result<(), RclrsError> {
+    let default_context_m = DefaultContext::get_global_default_context(args);
+    install_signal_handler(Arc::clone(&default_context_m.lock().unwrap().global_default_context)).await;
+
+    Ok(())
+}
+
+/// Call Ok
+///
+pub fn ok() -> bool {
+    let default_context_m = DefaultContext::get_global_default_context([]);
+    let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+
+    context.ok()
+}
+
 /// Call context shutdown
 ///
-pub fn shutdown(context: &Context) {
+pub fn shutdown() -> Result<(), RclrsError> {
+    let default_context_m = DefaultContext::get_global_default_context([]);
+    let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+
     context.shutdown();
+
+    Ok(())
 }

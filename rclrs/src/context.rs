@@ -1,8 +1,10 @@
 mod builder;
+mod default_context;
 use std::string::String;
 use std::sync::{Arc, Mutex};
 
 pub use self::builder::*;
+pub use self::default_context::DefaultContext;
 use crate::rcl_bindings::*;
 use crate::error::{to_rclrs_result, RclrsError};
 
