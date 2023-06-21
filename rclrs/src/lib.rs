@@ -169,6 +169,7 @@ pub async fn install_signal_handler(context: Arc<Context>) {
     tokio::spawn(async move {
         while let Ok(_) = tokio::signal::ctrl_c().await {
             context.shutdown();
+            break;
         }
     });
 }
@@ -197,7 +198,8 @@ pub fn shutdown() -> Result<(), RclrsError> {
     let default_context_m = DefaultContext::get_global_default_context([]);
     let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
 
-    context.shutdown();
-
-    Ok(())
+    match context.shutdown() {
+        true => return Ok(()),
+        false => return error::to_rclrs_result(error::RclReturnCode::AlreadyShutdown as i32),
+    }
 }
