@@ -10,6 +10,7 @@ async fn main() -> Result<(), Error> {
     rclrs::init(env::args()).await?;
 
     let mut node = rclrs::create_node_with_default_context("minimal_node")?;
+    let node_name = node.name();
 
     let publisher =
         node.create_publisher::<std_msgs::msg::String>("topic", rclrs::QOS_PROFILE_DEFAULT)?;
@@ -37,6 +38,8 @@ async fn main() -> Result<(), Error> {
         publish_count += 1;
         std::thread::sleep(std::time::Duration::from_millis(500));
     }
+
+    println!("\n{} is terminated", node_name);
 
     Ok(())
 }
