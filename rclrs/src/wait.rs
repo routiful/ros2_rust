@@ -21,7 +21,7 @@ use std::vec::Vec;
 
 use crate::error::{to_rclrs_result, RclReturnCode, RclrsError, ToResult};
 use crate::rcl_bindings::*;
-use crate::{ClientBase, Context, Node, ServiceBase, SubscriptionBase};
+use crate::{ClientBase, Context, DefaultContext, Node, ServiceBase, SubscriptionBase};
 
 mod exclusivity_guard;
 mod guard_condition;
@@ -125,9 +125,10 @@ impl WaitSet {
         let live_clients = node.live_clients();
         let live_guard_conditions = node.live_guard_conditions();
         let live_services = node.live_services();
-        let ctx = Context {
-            rcl_context_mtx: node.rcl_context_mtx.clone(),
-        };
+
+        let default_context_m = DefaultContext::get_global_default_context([]);
+        let ctx = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+
         let mut wait_set = WaitSet::new(
             live_subscriptions.len(),
             live_guard_conditions.len(),
@@ -135,7 +136,7 @@ impl WaitSet {
             live_clients.len(),
             live_services.len(),
             0,
-            &ctx,
+            &ctx.lock().unwrap(),
         )?;
 
         for live_subscription in &live_subscriptions {

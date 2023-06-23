@@ -24,7 +24,7 @@ mod rcl_bindings;
 pub mod dynamic_message;
 
 use std::time::Duration;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 pub use arguments::*;
 pub use client::*;
@@ -133,9 +133,17 @@ pub fn create_node(context: &Context, node_name: &str) -> Result<Node, RclrsErro
 pub fn create_node_with_default_context(node_name: &str) -> Result<Node, RclrsError> {
     let default_context_m = DefaultContext::get_global_default_context([]);
     let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
-    let context = Arc::clone(&context);
+    let mut context = context.lock().unwrap();
 
-    Node::builder(&context, node_name).build()
+    match Node::builder(&context, node_name).build() {
+        Ok(mut node) => {
+            let gc = node.create_guard_condition();
+            let callback = move || { gc.trigger().unwrap(); };
+            context.add_on_shutdown_callback(Box::new(callback) as Box<dyn Fn() + Send + Sync>);
+            Ok(node)
+        },
+        Err(e) => Err(e),
+    }
 }
 
 /// Creates a [`NodeBuilder`][1].
@@ -164,13 +172,13 @@ pub fn create_node_builder(context: &Context, node_name: &str) -> NodeBuilder {
 ///
 /// Convenience function to install signal handler.
 /// When it receives SIGINT, call context shutdown.
-pub async fn install_signal_handler(context: Arc<Context>) {
+pub async fn install_signal_handler(context: Arc<Mutex<Context>>) {
     let context = Arc::clone(&context);
     tokio::spawn(async move {
-        while let Ok(_) = tokio::signal::ctrl_c().await {
-            context.shutdown();
-            break;
-        }
+        tokio::signal::ctrl_c().await.unwrap();
+
+        let context = context.lock().unwrap();
+        context.shutdown();
     });
 }
 
@@ -178,7 +186,8 @@ pub async fn install_signal_handler(context: Arc<Context>) {
 ///
 pub async fn init(args: impl IntoIterator<Item = String>) -> Result<(), RclrsError> {
     let default_context_m = DefaultContext::get_global_default_context(args);
-    install_signal_handler(Arc::clone(&default_context_m.lock().unwrap().global_default_context)).await;
+    let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+    install_signal_handler(context).await;
 
     Ok(())
 }
@@ -188,6 +197,7 @@ pub async fn init(args: impl IntoIterator<Item = String>) -> Result<(), RclrsErr
 pub fn ok() -> bool {
     let default_context_m = DefaultContext::get_global_default_context([]);
     let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+    let context = context.lock().unwrap();
 
     context.ok()
 }
@@ -197,9 +207,10 @@ pub fn ok() -> bool {
 pub fn shutdown() -> Result<(), RclrsError> {
     let default_context_m = DefaultContext::get_global_default_context([]);
     let context = Arc::clone(&default_context_m.lock().unwrap().global_default_context);
+    let context = context.lock().unwrap();
 
     match context.shutdown() {
-        true => return Ok(()),
-        false => return error::to_rclrs_result(error::RclReturnCode::AlreadyShutdown as i32),
+        true => Ok(()),
+        false => error::to_rclrs_result(error::RclReturnCode::AlreadyShutdown as i32),
     }
 }

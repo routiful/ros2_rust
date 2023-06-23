@@ -6,7 +6,7 @@ use crate::context::Context;
 ///
 pub struct DefaultContext {
     /// Arc<Context>
-    pub global_default_context: Arc<Context>,
+    pub global_default_context: Arc<Mutex<Context>>,
 }
 
 impl DefaultContext {
@@ -17,7 +17,7 @@ impl DefaultContext {
         static GLOBAL_DEFAULT_CONTEXT: OnceLock<Mutex<DefaultContext>> = OnceLock::new();
         GLOBAL_DEFAULT_CONTEXT.get_or_init(
             || Mutex::new(DefaultContext {
-                global_default_context: Arc::new(Context::new(args).unwrap())
+                global_default_context: Arc::new(Context::new(args).unwrap().into())
             })
         )
     }

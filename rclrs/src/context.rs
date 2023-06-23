@@ -44,6 +44,7 @@ unsafe impl Send for rcl_context_t {}
 ///
 pub struct Context {
     pub(crate) rcl_context_mtx: Arc<Mutex<rcl_context_t>>,
+    pub(crate) shutdown_callback: Option<Box<dyn Fn() + Send + Sync>>,
 }
 
 impl Context {
@@ -152,6 +153,13 @@ impl Context {
         ContextBuilder::new(args)
     }
 
+    /// Add on shutdown callback
+    ///
+    /// To trigger wait set, this callback will be invoked after context shutdown.
+    pub fn add_on_shutdown_callback(&mut self, callback: Box<dyn Fn() + Send + Sync>) {
+        self.shutdown_callback = Some(callback);
+    }
+
     /// Shutdown the context, making it uninitialized and therefore invalid for derived entities.
     ///
     /// # Example
@@ -174,7 +182,12 @@ impl Context {
             if let Err(e) = to_rclrs_result(ret) {
                 panic!("Failed to finalize context: {:?}", e);
             }
-            return true;
+
+            if let Some(callback) = &self.shutdown_callback {
+                callback();
+            }
+
+            true
         }
     }
 }
