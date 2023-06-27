@@ -1,21 +1,25 @@
 [package]
-name = "examples_rclrs_minimal_pub_sub_v2"
+name = "examples_rclrs_default_context"
 version = "0.3.1"
 # This project is not military-sponsored, Jacob's employment contract just requires him to use this email address
 authors = ["Esteve Fernandez <esteve@apache.org>", "Nikolai Morin <nnmmgit@gmail.com>", "Jacob Hassold <jacob.a.hassold.civ@army.mil>", "Taehun Lim <taehun.lim@42dot.ai>"]
 edition = "2021"
 
 [[bin]]
-name = "minimal_publisher_v2"
-path = "src/minimal_publisher_v2.rs"
+name = "minimal_publisher"
+path = "src/minimal_publisher.rs"
 
 [[bin]]
-name = "minimal_subscriber_v2"
-path = "src/minimal_subscriber_v2.rs"
+name = "minimal_subscriber"
+path = "src/minimal_subscriber.rs"
 
 [[bin]]
 name = "minimal_node"
 path = "src/minimal_node.rs"
+
+[[bin]]
+name = "minimal_node_struct"
+path = "src/minimal_node_struct.rs"
 
 [dependencies]
 anyhow = {version = "1", features = ["backtrace"]}

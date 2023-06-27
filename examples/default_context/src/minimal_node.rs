@@ -1,8 +1,4 @@
-use std::{
-    env,
-    thread,
-};
-
+use std::{env, thread};
 use anyhow::{Error, Result};
 
 #[tokio::main]
@@ -28,7 +24,7 @@ async fn main() -> Result<(), Error> {
     )?;
 
     thread::spawn(move || {
-        _ = rclrs::spin(&node).expect("Failed to read ROS node");
+        rclrs::spin(&node).expect("Failed to read ROS node");
     });
 
     while rclrs::ok() {

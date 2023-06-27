@@ -3,9 +3,9 @@
    href="http://download.ros.org/schema/package_format3.xsd"
    schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>examples_rclrs_minimal_pub_sub_v2</name>
+  <name>examples_rclrs_default_context</name>
   <version>0.3.1</version>
-  <description>Package containing an example of the publish-subscribe mechanism version 2 in rclrs.</description>
+  <description>Package containing an example of the publish-subscribe mechanism with default context.</description>
   <maintainer email="esteve@apache.org">Esteve Fernandez</maintainer>
   <maintainer email="nnmmgit@gmail.com">Nikolai Morin</maintainer>
   <!-- This project is not military-sponsored, Jacob's employment contract just requires him to use this email address -->
