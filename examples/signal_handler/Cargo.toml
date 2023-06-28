@@ -1,0 +1,26 @@
+[package]
+name = "examples_rclrs_signal_handler"
+version = "0.3.1"
+# This project is not military-sponsored, Jacob's employment contract just requires him to use this email address
+authors = ["Esteve Fernandez <esteve@apache.org>", "Nikolai Morin <nnmmgit@gmail.com>", "Jacob Hassold <jacob.a.hassold.civ@army.mil>", "Taehun Lim <taehun.lim@42dot.ai>"]
+edition = "2021"
+
+[[bin]]
+name = "signal_handler"
+path = "src/signal_handler.rs"
+
+[dependencies]
+anyhow = {version = "1", features = ["backtrace"]}
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+
+[dependencies.rclrs]
+version = "0.3"
+
+[patch.crates-io]
+rclrs = { path = "../../rclrs" }
+
+[dependencies.rosidl_runtime_rs]
+version = "0.3"
+
+[dependencies.std_msgs]
+version = "*"
