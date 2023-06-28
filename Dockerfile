@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     libclang-dev \
+    neovim \
     tmux \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
@@ -15,7 +16,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --defau
 ENV PATH=/root/.cargo/bin:$PATH
 RUN cargo install cargo-ament-build
 
-RUN pip install --upgrade pytest 
+RUN pip install --upgrade pytest
 
 # Install the colcon-cargo and colcon-ros-cargo plugins
 RUN pip install git+https://github.com/colcon/colcon-cargo.git git+https://github.com/colcon/colcon-ros-cargo.git

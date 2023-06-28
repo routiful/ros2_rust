@@ -130,6 +130,7 @@ impl ContextBuilder {
         }
         Ok(Context {
             rcl_context_mtx: Arc::new(Mutex::new(rcl_context)),
+            shutdown_callback: None,
         })
     }
 
