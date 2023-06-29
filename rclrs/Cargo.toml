@@ -24,6 +24,8 @@ libloading = { version = "0.7", optional = true }
 rosidl_runtime_rs = "0.3"
 # Needed for asyncronous programming
 tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "signal"] }
+# Needed for default context
+once_cell = "1.18.0"
 
 [dev-dependencies]
 # Needed for e.g. writing yaml files in tests
